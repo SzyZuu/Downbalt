@@ -14,6 +14,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
+import com.szyzu.downbalt.ui.MainScreen
 import com.szyzu.downbalt.ui.theme.DownbaltTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,10 +24,8 @@ class MainActivity : ComponentActivity() {
         setContent {
             DownbaltTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                    MainScreen()
+                    innerPadding
                 }
             }
         }
@@ -45,8 +44,8 @@ fun Greeting(name: String, modifier: Modifier = Modifier) {
 
 @Preview(showBackground = true)
 @Composable
-fun GreetingPreview() {
+fun MainPreview() {
     DownbaltTheme {
-        Greeting("Android")
+        MainScreen()
     }
 }
