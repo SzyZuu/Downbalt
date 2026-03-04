@@ -32,9 +32,6 @@ fun MainScreen(
     var showDialog by remember { mutableStateOf(false) }
     var linkText by remember { mutableStateOf("") }
 
-
-
-
     Box(
         modifier = modifier.fillMaxSize()
     ) {
@@ -85,6 +82,7 @@ fun MainScreen(
                     TextButton(
                         onClick = {
                             showDialog = false
+                            viewModel.updateLink(linkText)
                         }
                     ) {
                         Text("Save")
