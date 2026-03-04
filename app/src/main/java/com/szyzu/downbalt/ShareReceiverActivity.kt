@@ -19,9 +19,14 @@ class ShareReceiverActivity : Activity() {
 
             if(sharedText != null){
                 Toast.makeText(this, "Download started >:D", Toast.LENGTH_SHORT).show()
+                handleSendLink(sharedText)
             }
         }
 
         finish()
+    }
+
+    fun handleSendLink(link : String){
+        // TODO: send to cobalt api -> download file with download manager
     }
 }
