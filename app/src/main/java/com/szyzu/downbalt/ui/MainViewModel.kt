@@ -17,6 +17,13 @@ class MainViewModel(private val dataStore: DataStoreManager) : ViewModel() {
     private val _uiState = MutableStateFlow(Settings())
     val uiState : StateFlow<Settings> = _uiState.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            val link = dataStore.getFromDataStore() ?: "None"
+            _uiState.value = Settings(link)
+        }
+    }
+
     fun updateLink(newLink : String){
         _uiState.value = Settings(newLink)
         viewModelScope.launch {
