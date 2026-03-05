@@ -1,7 +1,6 @@
 package com.szyzu.downbalt.ui
 
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,12 +20,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.datastore.dataStore
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.szyzu.downbalt.data.DataStoreManager
 
 @Composable
 fun MainScreen(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = viewModel()
+    dataStore: DataStoreManager,
+    viewModel: MainViewModel = viewModel(
+        factory = MainViewModel.provideFactory(dataStore)
+    )
 ) {
     val uiState by viewModel.uiState.collectAsState()
     var showDialog by remember { mutableStateOf(false) }
