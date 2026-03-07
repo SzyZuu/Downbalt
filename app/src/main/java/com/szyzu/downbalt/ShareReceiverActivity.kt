@@ -23,16 +23,16 @@ class ShareReceiverActivity : Activity() {
 
             if(sharedText != null){
                 Toast.makeText(this, "Download started >:D", Toast.LENGTH_SHORT).show()
-                handleSendLink(sharedText)
+                handleSendLink(sharedText, appName)
             }
         }
 
         finish()
     }
 
-    fun handleSendLink(link : String){
+    fun handleSendLink(link : String, app: String){
         val downloadWork = OneTimeWorkRequestBuilder<DownloadWorker>()
-            .setInputData(workDataOf("MEDIA_URL" to link))
+            .setInputData(workDataOf("MEDIA_URL" to link, "APP_NAME" to app))
             .build()
 
         WorkManager.getInstance(this).enqueue(downloadWork)
