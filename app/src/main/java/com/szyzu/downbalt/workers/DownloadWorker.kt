@@ -58,9 +58,6 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters): Corou
                 .url(inputLink)
                 .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
                 .addHeader("Accept", "*/*")
-                .addHeader("Accept-Language", "en-US,en;q=0.9")
-                .addHeader("Origin", "https://cobalt.szyzu.com")
-                .addHeader("Referer", "https://cobalt.szyzu.com/")
                 .build()
 
             client.newCall(downloadRequest).execute().use{downloadResponse ->
