@@ -15,6 +15,12 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import androidx.core.net.toUri
 import kotlinx.coroutines.delay
+import okhttp3.OkHttp
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.File
+import java.io.FileOutputStream
+import java.util.concurrent.TimeUnit
 
 class DownloadWorker(appContext: Context, workerParams: WorkerParameters): CoroutineWorker(appContext, workerParams) {
     private val dataStore = DataStoreManager(appContext)
@@ -36,18 +42,41 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters): Corou
             val downloadUri = response.url
             Logger.getLogger("DownloadWorker").log(Level.INFO, downloadUri)
 
-            val request = DownloadManager.Request(downloadUri.toUri())
-                .addRequestHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:148.0) Gecko/20100101 Firefox/148.0")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE)
-                .setAllowedOverMetered(true)
-                .setDestinationInExternalPublicDir(
-                    Environment.DIRECTORY_DOWNLOADS,
-                    response.filename
-                )
+            val publicDownloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+            val appFolder = File(publicDownloads, appName)
+            if(!appFolder.exists()) appFolder.mkdirs()
 
-            val downloadManager = applicationContext.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            val destinationFile = File(appFolder, response.filename)
 
-            downloadManager.enqueue(request)
+            val client = OkHttpClient.Builder()
+                .connectTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(30, TimeUnit.SECONDS)
+                .writeTimeout(40, TimeUnit.SECONDS)
+                .build()
+
+            val downloadRequest = Request.Builder()
+                .url(inputLink)
+                .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
+                .addHeader("Accept", "*/*")
+                .addHeader("Accept-Language", "en-US,en;q=0.9")
+                .addHeader("Origin", "https://cobalt.szyzu.com")
+                .addHeader("Referer", "https://cobalt.szyzu.com/")
+                .build()
+
+            client.newCall(downloadRequest).execute().use{downloadResponse ->
+                if(!downloadResponse.isSuccessful){
+                    Logger.getLogger("DownloadWorker").log(Level.SEVERE, "Download failed")
+                    return Result.failure()
+                }
+
+                val body = downloadResponse.body
+                body.byteStream().use{inputStream ->
+                    FileOutputStream(destinationFile).use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                        outputStream.flush()
+                    }
+                }
+            }
 
             Result.success()
         }catch (e: Exception){
