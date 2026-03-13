@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -45,12 +46,12 @@ fun MainScreen(
         ) {
             Box(
                 modifier = Modifier
-                    .border(2.dp, Color.Black, RoundedCornerShape(16.dp))
+                    .border(2.dp, MaterialTheme.colorScheme.primary , RoundedCornerShape(16.dp))
                     .padding(16.dp)
             ) {
                 Text(
                     text = "Change Cobalt link",
-                    color = Color.Black
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
