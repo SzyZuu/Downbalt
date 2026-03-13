@@ -15,6 +15,9 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import androidx.core.net.toUri
 import kotlinx.coroutines.delay
+import okhttp3.Cookie
+import okhttp3.CookieJar
+import okhttp3.HttpUrl
 import okhttp3.OkHttp
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -36,8 +39,10 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters): Corou
 
             RetrofitClient.setLink(apiLink)
             val response = RetrofitClient.apiService.postLink(
-                CobaltRequestBody(inputLink)
+                CobaltRequestBody(extractUrl(inputLink)?: inputLink)
             )
+
+            Logger.getLogger("DownloadWorker").log(Level.INFO, extractUrl(inputLink))
 
             val downloadUri = response.url
             Logger.getLogger("DownloadWorker").log(Level.INFO, downloadUri)
@@ -52,10 +57,13 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters): Corou
                 .connectTimeout(20, TimeUnit.SECONDS)
                 .readTimeout(30, TimeUnit.SECONDS)
                 .writeTimeout(40, TimeUnit.SECONDS)
+                .cookieJar(cookieJar)
+                .followRedirects(true)
+                .followSslRedirects(true)
                 .build()
 
             val downloadRequest = Request.Builder()
-                .url(inputLink)
+                .url(downloadUri)
                 .addHeader("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36")
                 .addHeader("Accept", "*/*")
                 .build()
@@ -78,9 +86,29 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters): Corou
             Result.success()
         }catch (e: Exception){
             Logger.getLogger("DownloadWorker").log(Level.SEVERE, e.message)
-            Looper.prepare()
-            Toast.makeText(applicationContext, "Download Error :C", Toast.LENGTH_SHORT).show()
+            //Looper.prepare()
+            //Toast.makeText(applicationContext, "Download Error :C", Toast.LENGTH_SHORT).show()
             Result.failure()
         }
+    }
+
+    val cookieJar = object : CookieJar {
+        private val cookieStore = HashMap<String, List<Cookie>>()
+
+        override fun saveFromResponse(url: HttpUrl, cookies: List<Cookie>) {
+            cookieStore[url.host] = cookies
+        }
+
+        override fun loadForRequest(url: HttpUrl): List<Cookie> {
+            return cookieStore[url.host] ?: ArrayList()
+        }
+    }
+
+    fun extractUrl(sharedText: String): String? {
+        val urlRegex = Regex("""(https?://[^\s]+)""")
+
+        val matchResult = urlRegex.find(sharedText)
+
+        return matchResult?.value
     }
 }

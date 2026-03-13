@@ -31,8 +31,12 @@ class ShareReceiverActivity : Activity() {
     }
 
     fun handleSendLink(link : String, app: String){
+        var appString = app
+        if(app.equals("null")){
+            appString = "Downbalt"
+        }
         val downloadWork = OneTimeWorkRequestBuilder<DownloadWorker>()
-            .setInputData(workDataOf("MEDIA_URL" to link, "APP_NAME" to app))
+            .setInputData(workDataOf("MEDIA_URL" to link, "APP_NAME" to appString))
             .build()
 
         WorkManager.getInstance(this).enqueue(downloadWork)
