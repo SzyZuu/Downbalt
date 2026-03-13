@@ -2,6 +2,7 @@ package com.szyzu.downbalt.workers
 
 import android.app.DownloadManager
 import android.content.Context
+import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Environment
 import android.os.Looper
@@ -52,6 +53,7 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters): Corou
             if(!appFolder.exists()) appFolder.mkdirs()
 
             val destinationFile = File(appFolder, response.filename)
+            Logger.getLogger("DownloadWorker").log(Level.INFO, response.filename)
 
             val client = OkHttpClient.Builder()
                 .connectTimeout(20, TimeUnit.SECONDS)
@@ -78,8 +80,15 @@ class DownloadWorker(appContext: Context, workerParams: WorkerParameters): Corou
                 body.byteStream().use{inputStream ->
                     FileOutputStream(destinationFile).use { outputStream ->
                         inputStream.copyTo(outputStream)
-                        outputStream.flush()
                     }
+                }
+
+                MediaScannerConnection.scanFile(
+                    applicationContext,
+                    arrayOf(destinationFile.absolutePath),
+                    null
+                ){ path, uri ->
+                    Logger.getLogger("DownloadWorker").log(Level.INFO, "Scanned $path:")
                 }
             }
 
